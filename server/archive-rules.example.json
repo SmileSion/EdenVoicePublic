@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "rules": [
+    {
+      "id": "hundred_hours_together",
+      "version": 1,
+      "enabled": true,
+      "category": "voice",
+      "trigger": "voice",
+      "rarity": "rare",
+      "importance": 70,
+      "titles": {
+        "zh-CN": "百小时的声音",
+        "en-US": "One Hundred Hours"
+      },
+      "descriptions": {
+        "zh-CN": "这个房间累计留下了一百小时的声音。",
+        "en-US": "One hundred hours of voices were left in this room."
+      },
+      "condition": {
+        "metric": "active_voice_seconds",
+        "operator": "crosses",
+        "value": 360000
+      },
+      "dedupe": {
+        "scope": "room",
+        "mode": "forever"
+      }
+    }
+  ]
+}

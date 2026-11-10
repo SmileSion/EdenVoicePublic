@@ -1,0 +1,300 @@
+[
+  {
+    "id": "cs2",
+    "title": "Counter-Strike 2",
+    "executables": [
+      "cs2.exe"
+    ]
+  },
+  {
+    "id": "dota2",
+    "title": "Dota 2",
+    "executables": [
+      "dota2.exe"
+    ]
+  },
+  {
+    "id": "lol",
+    "title": "英雄联盟",
+    "executables": [
+      "league of legends.exe"
+    ]
+  },
+  {
+    "id": "valorant",
+    "title": "无畏契约",
+    "executables": [
+      "valorant-win64-shipping.exe"
+    ]
+  },
+  {
+    "id": "pubg",
+    "title": "PUBG",
+    "executables": [
+      "tslgame.exe"
+    ]
+  },
+  {
+    "id": "apex",
+    "title": "Apex Legends",
+    "executables": [
+      "r5apex.exe",
+      "r5apex_dx12.exe"
+    ]
+  },
+  {
+    "id": "overwatch",
+    "title": "守望先锋",
+    "executables": [
+      "overwatch.exe"
+    ]
+  },
+  {
+    "id": "fortnite",
+    "title": "Fortnite",
+    "executables": [
+      "fortniteclient-win64-shipping.exe"
+    ]
+  },
+  {
+    "id": "genshin",
+    "title": "原神",
+    "executables": [
+      "genshinimpact.exe",
+      "yuanshen.exe"
+    ]
+  },
+  {
+    "id": "starrail",
+    "title": "崩坏：星穹铁道",
+    "executables": [
+      "starrail.exe"
+    ]
+  },
+  {
+    "id": "eldenring",
+    "title": "艾尔登法环",
+    "executables": [
+      "eldenring.exe"
+    ]
+  },
+  {
+    "id": "bg3",
+    "title": "博德之门 3",
+    "executables": [
+      "bg3.exe",
+      "bg3_dx11.exe"
+    ]
+  },
+  {
+    "id": "helldivers2",
+    "title": "绝地潜兵 2",
+    "executables": [
+      "helldivers2.exe"
+    ]
+  },
+  {
+    "id": "minecraft-bedrock",
+    "title": "Minecraft 基岩版",
+    "executables": [
+      "minecraft.windows.exe"
+    ]
+  },
+  {
+    "id": "terraria",
+    "title": "泰拉瑞亚",
+    "executables": [
+      "terraria.exe"
+    ]
+  },
+  {
+    "id": "stardew",
+    "title": "星露谷物语",
+    "executables": [
+      "stardew valley.exe"
+    ]
+  },
+  {
+    "id": "delta-force",
+    "title": "三角洲行动",
+    "executables": [
+      "deltaforceclient-win64-shipping.exe"
+    ]
+  },
+  {
+    "id": "dead-by-daylight",
+    "title": "黎明杀机",
+    "executables": [
+      "deadbydaylight-win64-shipping.exe",
+      "deadbydaylight-egs-shipping.exe"
+    ]
+  },
+  {
+    "id": "naraka",
+    "title": "永劫无间",
+    "executables": [
+      "narakabladepoint.exe"
+    ]
+  },
+  {
+    "id": "rainbow-six-siege",
+    "title": "彩虹六号：围攻",
+    "executables": [
+      "rainbowsix.exe",
+      "rainbowsixgame.exe",
+      "rainbowsix_vulkan.exe"
+    ]
+  },
+  {
+    "id": "rust",
+    "title": "Rust 腐蚀",
+    "executables": [
+      "rustclient.exe"
+    ]
+  },
+  {
+    "id": "palworld",
+    "title": "幻兽帕鲁",
+    "executables": [
+      "palworld-win64-shipping.exe",
+      "palworld-wingdk-shipping.exe"
+    ]
+  },
+  {
+    "id": "valheim",
+    "title": "英灵神殿",
+    "executables": [
+      "valheim.exe"
+    ]
+  },
+  {
+    "id": "left-4-dead-2",
+    "title": "求生之路 2",
+    "executables": [
+      "left4dead2.exe"
+    ]
+  },
+  {
+    "id": "deep-rock-galactic",
+    "title": "深岩银河",
+    "executables": [
+      "fsd-win64-shipping.exe"
+    ]
+  },
+  {
+    "id": "it-takes-two",
+    "title": "双人成行",
+    "executables": [
+      "ittakestwo.exe"
+    ]
+  },
+  {
+    "id": "lethal-company",
+    "title": "致命公司",
+    "executables": [
+      "lethal company.exe"
+    ]
+  },
+  {
+    "id": "phasmophobia",
+    "title": "恐鬼症",
+    "executables": [
+      "phasmophobia.exe"
+    ]
+  },
+  {
+    "id": "overcooked-2",
+    "title": "胡闹厨房 2",
+    "executables": [
+      "overcooked2.exe"
+    ]
+  },
+  {
+    "id": "risk-of-rain-2",
+    "title": "雨中冒险 2",
+    "executables": [
+      "risk of rain 2.exe"
+    ]
+  },
+  {
+    "id": "the-forest",
+    "title": "森林",
+    "executables": [
+      "theforest.exe",
+      "theforestvr.exe"
+    ]
+  },
+  {
+    "id": "sons-of-the-forest",
+    "title": "森林之子",
+    "executables": [
+      "sonsoftheforest.exe"
+    ]
+  },
+  {
+    "id": "party-animals",
+    "title": "猛兽派对",
+    "executables": [
+      "partyanimals.exe"
+    ]
+  },
+  {
+    "id": "sea-of-thieves",
+    "title": "盗贼之海",
+    "executables": [
+      "sotgame.exe",
+      "seaofthieves.exe"
+    ]
+  },
+  {
+    "id": "among-us",
+    "title": "Among Us",
+    "executables": [
+      "among us.exe"
+    ]
+  },
+  {
+    "id": "warframe",
+    "title": "星际战甲",
+    "executables": [
+      "warframe.exe",
+      "warframe.x64.exe"
+    ]
+  },
+  {
+    "id": "marvel-rivals",
+    "title": "漫威争锋",
+    "executables": [
+      "marvel.exe",
+      "marvel-win64-shipping.exe"
+    ]
+  },
+  {
+    "id": "monster-hunter-world",
+    "title": "怪物猎人：世界",
+    "executables": [
+      "monsterhunterworld.exe"
+    ]
+  },
+  {
+    "id": "monster-hunter-rise",
+    "title": "怪物猎人：崛起",
+    "executables": [
+      "monsterhunterrise.exe"
+    ]
+  },
+  {
+    "id": "ready-or-not",
+    "title": "严阵以待",
+    "executables": [
+      "readyornot-win64-shipping.exe"
+    ]
+  },
+  {
+    "id": "content-warning",
+    "title": "内容警告",
+    "executables": [
+      "content warning.exe"
+    ]
+  }
+]

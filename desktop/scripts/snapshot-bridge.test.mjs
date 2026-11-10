@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+import {runInNewContext} from 'node:vm';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('..',import.meta.url));
+const result=await build({stdin:{resolveDir:root,contents:`import {listenForSnapshots} from './src/bridge';window.start=()=>listenForSnapshots(s=>window.received.push(s));`},bundle:true,write:false,format:'iife',plugins:[{name:'mock-native',setup(b){b.onResolve({filter:/^@tauri-apps\/api\//},a=>({path:a.path,namespace:'mock'}));b.onLoad({filter:/.*/,namespace:'mock'},()=>({contents:`export const invoke=async()=>{window.reads++;return structuredClone(window.snapshot);};export const listen=async(name,fn)=>{window.listeners[name]=fn;return()=>delete window.listeners[name];};export const getCurrentWindow=()=>({});` }));}}]});
+const window={__TAURI_INTERNALS__:{},snapshot:{revision:4,users:[],messages:[{text:'history'}]},received:[],listeners:{},reads:0};
+runInNewContext(result.outputFiles[0].text,{window,structuredClone,console});
+const stop=await window.start();assert.equal(window.received.at(-1).revision,4);
+const original=window.received.at(-1);
+window.listeners['core-state-patch']({payload:{baseRevision:4,revision:5,changes:{inputLevel:.3}}});
+assert.equal(window.received.at(-1).messages,original.messages);assert.equal(window.reads,1);
+window.snapshot={revision:8,users:[],messages:[{text:'new history'}]};
+window.listeners['core-state-patch']({payload:{baseRevision:7,revision:8,changes:{inputLevel:.8}}});
+await new Promise(r=>setImmediate(r));assert.equal(window.received.at(-1).revision,8);assert.equal(window.received.at(-1).messages[0].text,'new history');
+window.listeners['core-state-patch']({payload:{baseRevision:5,revision:6,changes:{inputLevel:1}}});assert.equal(window.received.at(-1).revision,8);
+stop();assert.equal(Object.keys(window.listeners).length,0);
+console.log('PASS: native patch stream preserves history, resyncs gaps, rejects stale events and cleans listeners');

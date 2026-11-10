@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/rustls/rustls-platform-verifier",
+  "commit": "252e25161a91af476cbea620e29d277592d27ec7",
+  "files_sha256": {
+    "LICENSE-APACHE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "LICENSE-MIT": "1c7cf76689c837a68ed8d704994e52a0f2940c087958f860d17f3186afbdcc0c"
+  }
+}

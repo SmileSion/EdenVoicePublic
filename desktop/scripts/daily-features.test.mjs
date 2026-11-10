@@ -1,0 +1,38 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+import {readFile} from 'node:fs/promises';
+import {createServer} from 'node:http';
+import {fileURLToPath} from 'node:url';
+import {build} from 'esbuild';
+const require=createRequire(import.meta.url),{chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const root=fileURLToPath(new URL('..',import.meta.url));
+const {version:currentVersion}=JSON.parse(await readFile(root+'/package.json','utf8'));
+const nextParts=currentVersion.split('.').map(Number);nextParts[2]++;
+const nextVersion='v'+nextParts.join('.');
+const bundle=await build({stdin:{resolveDir:root,loader:'tsx',contents:`
+import React,{useState} from 'react';import{createRoot}from'react-dom/client';import{PasswordRoom}from'./src/PasswordRoom';import{UpdateNotice,newerVersion}from'./src/UpdateNotice';import{dispatch,getSnapshot}from'./src/bridge';import{mockSnapshot}from'./src/mock';
+window.__TAURI_INTERNALS__={};window.calls=[];const snapshot=structuredClone(mockSnapshot);snapshot.lockedChannelIds=['2'];snapshot.users.find(u=>u.sessionId===snapshot.selfSessionId).channelId='0';snapshot.error='';
+window.rpc=async(name,args)=>{if(name==='get_snapshot')return snapshot;if(name==='dispatch_core'){window.calls.push(args.command);return;}if(name==='pending_update')return window.pending||null;if(name==='download_update'){if(window.failDownload)throw Error('network');window.downloads=(window.downloads||0)+1;window.pending={version:args.version};return;}if(name==='cancel_pending_update'){window.pending=null;return;}if(name==='install_update'){window.installs=(window.installs||0)+1;if(window.inCall&&!args.allowDisconnect)throw Error('IN_CALL');window.installed=true;return;}if(name==='check_update'&&window.failUpdate)throw Error('unreachable');if(name==='check_update')return {automatic:true,version:${JSON.stringify(nextVersion)},url:'https://example.com/releases/',downloadUrl:'https://example.com/releases/client-setup.exe'};if(name==='open_update'){window.opened=args.url;return;}};
+window.join=()=>dispatch({type:'join_channel',channelId:'2'});window.newer=newerVersion;
+function Fixture(){const[s,setS]=useState(snapshot);window.result=(error,channel)=>{snapshot.error=error;snapshot.revision++;if(channel)snapshot.users.find(u=>u.sessionId===snapshot.selfSessionId).channelId=channel;setS(structuredClone(snapshot));};return <div className="app-shell theme-dark"><PasswordRoom snapshot={s}/><UpdateNotice settings/></div>;}getSnapshot().then(()=>createRoot(document.getElementById('root')).render(<Fixture/>));
+`},loader:{'.svg':'text'},bundle:true,write:false,format:'iife',jsx:'automatic',plugins:[{name:'native',setup(b){b.onResolve({filter:/^@tauri-apps\/api\/(core|event|window)$/},a=>({path:a.path,namespace:'mock'}));b.onLoad({filter:/.*/,namespace:'mock'},()=>({contents:'export const invoke=(...a)=>window.rpc(...a);export const listen=async()=>()=>{};export const getCurrentWindow=()=>({});'}));}}]});
+const css=(await Promise.all(['styles.css','watch-party.css','room-experience.css','close-behavior.css'].map(f=>readFile(root+'/src/'+f,'utf8')))).join('\n');
+const server=createServer((req,res)=>{res.setHeader('Content-Type',req.url==='/app.js'?'text/javascript':req.url==='/style.css'?'text/css':'text/html');res.end(req.url==='/app.js'?bundle.outputFiles[0].text:req.url==='/style.css'?css:'<html><link rel="stylesheet" href="/style.css"><div id="root"></div><script src="/app.js"></script></html>');});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const browser=await chromium.launch({executablePath:process.env.CHROME_EXECUTABLE});
+try{const page=await browser.newPage({viewport:{width:820,height:700}});const errors=[];page.on('pageerror',e=>errors.push(String(e)));await page.goto('http://127.0.0.1:'+server.address().port);await page.getByRole('button',{name:'检查更新',exact:true}).waitFor();await page.evaluate(()=>window.join());await page.getByRole('form',{name:'输入房间密码'}).waitFor();await page.getByLabel('房间密码',{exact:true}).fill('wrong');await page.getByRole('button',{name:'加入房间',exact:true}).click();assert.equal(await page.evaluate(()=>window.calls[0].type),'join_protected_channel');await page.evaluate(()=>window.result('房间密码错误',null));await page.getByRole('alert').waitFor();await page.getByLabel('房间密码',{exact:true}).fill('correct');await page.getByRole('button',{name:'加入房间',exact:true}).click();await page.evaluate(()=>window.result('','2'));await page.getByRole('form',{name:'输入房间密码'}).waitFor({state:'detached'});await page.getByRole('button',{name:'检查更新',exact:true}).click();assert.equal(await page.evaluate(()=>window.downloads||0),0);
+await page.getByRole('button',{name:'更新选项',exact:true}).click();
+await page.getByRole('dialog').waitFor();
+await page.screenshot({path:'/tmp/eden-update-confirm.png'});
+await page.getByRole('button',{name:'稍后',exact:true}).click();assert.equal(await page.evaluate(()=>window.downloads||0),0);
+await page.getByRole('button',{name:'更新选项',exact:true}).click();
+await page.getByRole('button',{name:'下载后下次启动安装',exact:true}).click();
+await page.getByRole('button',{name:'取消待更新',exact:true}).waitFor();assert.equal(await page.evaluate(()=>window.installs||0),0);assert.equal(await page.evaluate(()=>window.pending.version),nextVersion);
+await page.getByRole('button',{name:'取消待更新',exact:true}).click();await page.getByRole('button',{name:'更新选项',exact:true}).waitFor();assert.equal(await page.evaluate(()=>window.pending),null);
+await page.evaluate(()=>window.inCall=true);await page.getByRole('button',{name:'更新选项',exact:true}).click();await page.getByRole('button',{name:'下载并安装',exact:true}).click();
+await page.getByText('安装将结束当前通话',{exact:true}).waitFor();assert.equal(await page.evaluate(()=>!!window.installed),false);
+await page.screenshot({path:'/tmp/eden-update-call-confirm.png'});
+await page.getByRole('button',{name:'结束通话并安装',exact:true}).click();assert.equal(await page.evaluate(()=>window.installed),true);
+await page.getByRole('button',{name:'稍后',exact:true}).click();await page.getByRole('button',{name:'取消待更新',exact:true}).click();
+await page.evaluate(()=>window.failDownload=true);await page.getByRole('button',{name:'更新选项',exact:true}).click();await page.getByRole('button',{name:'下载并安装',exact:true}).click();await page.getByRole('dialog').waitFor({state:'detached'});assert.equal(await page.evaluate(()=>window.pending),null);
+assert.equal(await page.evaluate(()=>window.newer('v0.7.4')),false);assert.equal(await page.evaluate(v=>window.newer(v),nextVersion),true);assert.equal(await page.evaluate(v=>window.newer(v),currentVersion),false);assert.equal(await page.evaluate(()=>window.newer('v0.8.0-beta')),false);await page.evaluate(()=>window.failUpdate=true);await page.getByRole('button',{name:'检查更新',exact:true}).click();await page.waitForTimeout(100);assert.equal(await page.getByText('检查失败，请稍后重试',{exact:true}).count(),0);assert.deepEqual(errors,[]);console.log('PASS: locked-room prompt, error/retry/success, update consent, deferred/cancel, in-call confirmation, silent network failures and version comparison');}finally{await browser.close();server.close();}

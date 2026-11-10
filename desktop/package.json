@@ -1,0 +1,50 @@
+{
+  "name": "edenvoice-desktop",
+  "private": true,
+  "version": "0.8.5",
+  "author": "SmileSion",
+  "type": "module",
+  "scripts": {
+    "test:experience": "node --test scripts/experience-state.test.ts scripts/experience-ui.test.mjs",
+    "test:recovery": "node scripts/recovery.test.mjs",
+    "test:notifications": "node --test scripts/room-notifications.test.ts",
+    "test:chat": "node --test scripts/chat-presentation.test.ts",
+    "test:chat-scroll": "node scripts/chat-scroll.test.mjs",
+    "test:close": "node scripts/close-behavior.test.mjs",
+    "test:watch": "node scripts/watch-party.test.mjs",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "bundle": "npm run tauri -- build",
+    "bundle:macos": "npm run tauri -- build --bundles app,dmg",
+    "bundle:windows": "npm run tauri -- build --bundles nsis",
+    "bundle:windows:cross": "../scripts/package-release.sh --platform windows --skip-install --force",
+    "bundle:linux": "npm run tauri -- build --bundles appimage",
+    "preview": "vite preview",
+    "tauri": "node scripts/tauri.mjs",
+    "test:screen-share": "node --test scripts/screen-share.test.mjs",
+    "demo:room-social": "node scripts/room-social-demo.mjs",
+    "test": "node scripts/test.mjs",
+    "test:unit": "node scripts/test.mjs unit",
+    "test:browser": "node scripts/test.mjs browser",
+    "test:admin": "node scripts/test-admin.mjs",
+    "test:install": "playwright install chromium"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.12.4",
+    "lucide-react": "1.35.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.4",
+    "@types/node": "^26.4.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "esbuild": "^0.28.2",
+    "playwright": "1.64.1",
+    "typescript": "7.0.2",
+    "vite": "8.3.5"
+  },
+  "license": "GPL-3.0-only"
+}

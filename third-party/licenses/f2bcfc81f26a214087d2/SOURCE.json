@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/rustaudio/sample",
+  "commit": "97c3bb9b2363c0b46ac1633858bf1054fd02a980",
+  "files_sha256": {
+    "LICENSE-APACHE": "756c8d2ab2dc24f256e1455b5f03937f4933d83d7bc9f2d55009fc962377d512",
+    "LICENSE-MIT": "b1d6df41ed3aa96806e74c729444d7c121d90e6660a6aed01d298e03fde475a0"
+  }
+}

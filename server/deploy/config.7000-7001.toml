@@ -1,0 +1,65 @@
+# Server access password; empty means no password. Restart after changes.
+server_password = ""
+server_name = "EdenVoice"
+control_addr = "0.0.0.0:7000"
+voice_addr = "0.0.0.0:7001"
+
+[voice]
+worker_count = 0
+worker_queue_size = 64
+max_queue_delay_ms = 40
+writer_queue_size = 256
+write_batch_size = 64
+
+[observability]
+metrics_addr = "127.0.0.1:9100"
+
+[security]
+data_dir = "/var/lib/edenvoice"
+allow_legacy_insecure = false
+
+[network]
+p2p_enabled = true
+sfu_enabled = true
+relay_enabled = true
+p2p_max_room_size = 6
+hybrid_max_room_size = 12
+qualification_duration_ms = 1500
+qualification_rtt_ms = 80
+qualification_loss_percent = 2.0
+qualification_jitter_ms = 15
+minimum_dwell_time_ms = 1500
+migration_cooldown_ms = 10000
+degrade_duration_ms = 1500
+route_degrade_loss_percent = 5.0
+route_degrade_rtt_ms = 250
+route_degrade_jitter_ms = 40
+media_queue_size = 256
+
+# Optional screen sharing has its own fixed UDP port, separate from voice.
+# Open 7010/UDP and set public_ip for a cloud server behind 1:1 NAT.
+[screen_share]
+enabled = false
+public_ip = ""
+udp_port = 7010
+
+[[channels]]
+id = 1
+name = "大厅"
+sort_order = 0
+network_policy = "auto"
+audio_quality_policy = "auto"
+
+[[channels]]
+id = 2
+name = "Gaming"
+sort_order = 10
+network_policy = "auto"
+audio_quality_policy = "quality_10"
+
+[[channels]]
+id = 3
+name = "AFK"
+sort_order = 20
+network_policy = "force_sfu"
+audio_quality_policy = "quality_5"

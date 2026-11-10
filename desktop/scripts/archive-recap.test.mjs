@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+import {readFile} from 'node:fs/promises';
+import {createServer} from 'node:http';
+import {fileURLToPath} from 'node:url';
+import {build} from 'esbuild';
+const require=createRequire(import.meta.url),{chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const root=fileURLToPath(new URL('..',import.meta.url));
+const bundle=await build({stdin:{resolveDir:root,loader:'tsx',contents:`import React from'react';import{createRoot}from'react-dom/client';import{ArchiveRecap}from'./src/ArchiveRecap';window.calls=[];window.drawn=[];const fill=CanvasRenderingContext2D.prototype.fillText;CanvasRenderingContext2D.prototype.fillText=function(text,...args){window.drawn.push(text);return fill.call(this,text,...args);};window.__TAURI_INTERNALS__={};window.rpc=async(cmd,args)=>{window.calls.push([cmd,args]);return true;};createRoot(document.getElementById('root')).render(<ArchiveRecap archive={{ageDays:99,stats:{roomName:'私人房间',activeDays:32,activeVoiceSeconds:123456,historicalMembers:8},participantProfiles:{alice:{displayName:'Lumi'},bob:{displayName:'小鹿'},empty:{displayName:'  '},other:{displayName:'无关成员'}},events:[{id:'1',evening:{started_at:'2026-09-08T20:00:00Z',ended_at:'2026-09-08T22:18:00Z',duration_seconds:8280,games:['无畏契约'],movies:['星际穿越']},occurredAt:'2026-09-08T00:00:00Z',triggeredBy:['alice'],participants:['alice','bob','missing','empty']},{id:'2',occurredAt:'2026-09-08T00:00:00Z',triggeredBy:[],participants:[]}]}} copy={()=>['凌晨三点','夜深了，还有人愿意多陪一会儿。']} close={()=>{}}/>);`},bundle:true,write:false,format:'iife',jsx:'automatic',plugins:[{name:'native',setup(b){b.onResolve({filter:/^@tauri-apps\/api\/core$/},a=>({path:a.path,namespace:'mock'}));b.onLoad({filter:/.*/,namespace:'mock'},()=>({contents:`export const invoke=(...a)=>window.rpc(...a);`,loader:'js'}));}}]});
+const css=await readFile(root+'/src/styles.css','utf8');const server=createServer((req,res)=>{res.setHeader('Content-Type',req.url==='/app.js'?'text/javascript':req.url==='/style.css'?'text/css':'text/html');res.end(req.url==='/app.js'?bundle.outputFiles[0].text:req.url==='/style.css'?css:'<html><link rel="stylesheet" href="/style.css"><div id="root"></div><script src="/app.js"></script></html>');});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+const browser=await chromium.launch({executablePath:process.env.CHROME_EXECUTABLE});
+try {
+ const page=await browser.newPage({viewport:{width:900,height:820}}),errors=[];page.on('pageerror',e=>errors.push(String(e)));
+ await page.goto('http://127.0.0.1:'+server.address().port);await page.getByRole('dialog').waitFor();
+ const original=await page.locator('img').getAttribute('src');assert.ok(original.startsWith('data:image/png;base64,'));
+ assert.equal(await page.getByRole('checkbox',{name:'显示房间名称'}).isChecked(),false);
+ assert.equal(await page.getByRole('combobox').inputValue(),'1');assert.ok(await page.evaluate(()=>window.drawn.includes('2 小时 18 分')&&!window.drawn.includes('房间累计 · 截至本次回顾')));assert.ok(await page.evaluate(()=>window.drawn.some(s=>s.includes('无畏契约'))));
+ assert.equal(await page.getByRole('checkbox',{name:'显示成员昵称'}).isChecked(),true);
+ assert.ok(await page.evaluate(()=>window.drawn.includes('Lumi')&&window.drawn.includes('小鹿')&&!window.drawn.includes('missing')&&!window.drawn.includes('无关成员')));
+ await page.screenshot({path:'/tmp/edenvoice-evening-recap.png'});
+ await page.evaluate(()=>window.drawn=[]);await page.getByRole('checkbox',{name:'显示游戏和观影名称'}).uncheck();assert.ok(await page.evaluate(()=>!window.drawn.some(s=>s.includes('无畏契约')||s.includes('星际穿越'))));
+ const preview=await page.locator('img').getAttribute('src');await page.getByRole('button',{name:'保存为图片'}).click();
+ await page.getByText('回顾卡片已保存',{exact:true}).waitFor();
+ assert.equal(await page.evaluate(()=>window.calls[0][1].image),preview.split(',')[1]);
+ await page.evaluate(()=>window.drawn=[]);await page.getByRole('checkbox',{name:'显示成员昵称'}).uncheck();
+ await page.waitForFunction(value=>document.querySelector('img').src!==value,preview);
+ assert.equal(await page.evaluate(()=>window.drawn.includes('Lumi')),false);
+ await page.getByRole('combobox').selectOption('2');assert.equal(await page.getByRole('checkbox',{name:'显示成员昵称'}).isDisabled(),true);
+ await page.setViewportSize({width:400,height:700});assert.ok(await page.getByRole('button',{name:'保存为图片'}).isVisible());
+ assert.deepEqual(errors,[]);console.log('PASS: recap preview, event selection, privacy defaults and exact PNG export at desktop/narrow widths');
+}finally{await browser.close();server.close();}

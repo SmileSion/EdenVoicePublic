@@ -1,0 +1,14 @@
+export const stubController = `
+export {defaultScreenSettings,fitScreenSettings} from REAL_CONTROLLER;
+export class ScreenShareController {
+ constructor(){this.room={channel_id:'7',share_id:'',host_id:'101',viewers:2,ready:true,paused:false,settings:{width:1280,height:720,fps:30,bitrate_kbps:2000,audio:true},policy:{enabled:true,max_width:1920,max_height:1080,max_fps:30,max_bitrate_kbps:4000,allow_audio:true,max_viewers:8,max_rooms:4}};this.role='idle';}
+ onChange(cb){this.cb=cb;window.mockController=this;this.emit();}
+ emit(extra={}){this.cb({room:{...this.room},role:this.role,privacyPaused:this.room.paused,privacyBusy:false,stream:this.stream||null,busy:false,error:'',notice:'',...extra});}
+ refresh(){}receive(){}dispose(){clearInterval(this.timer);this.stream?.getTracks().forEach(t=>t.stop());}
+ scenario(name){this.dispose();this.stream=null;this.role='idle';this.room.share_id=['invite','paused'].includes(name)?'share':'';this.room.paused=name==='paused';this.room.host_id='101';this.room.settings.audio=true;this.emit(name==='ended'?{notice:'共享已结束，语音通话继续。'}:name==='error'?{error:'共享连接中断，可重新观看或发起共享'}:{});}
+ capture(){const canvas=document.createElement('canvas');canvas.width=1280;canvas.height=720;const ctx=canvas.getContext('2d');const draw=()=>{if(this.room.paused){ctx.fillStyle='#171a25';ctx.fillRect(0,0,1280,720);ctx.fillStyle='#f2edf8';ctx.font='32px system-ui';ctx.fillText('共享已暂停',550,365);return;}const g=ctx.createLinearGradient(0,0,1280,720);g.addColorStop(0,'#182733');g.addColorStop(1,'#344549');ctx.fillStyle=g;ctx.fillRect(0,0,1280,720);ctx.fillStyle='#93ada4';ctx.beginPath();ctx.moveTo(0,600);ctx.lineTo(360,180);ctx.lineTo(750,600);ctx.fill();ctx.fillStyle='#526f71';ctx.beginPath();ctx.moveTo(320,720);ctx.lineTo(850,140);ctx.lineTo(1280,640);ctx.lineTo(1280,720);ctx.fill();ctx.fillStyle='#eed5a8';ctx.beginPath();ctx.arc(1080,140,50,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font='18px system-ui';ctx.fillText('EDENVOICE / SCREEN SHARE',48,55);ctx.font='48px serif';ctx.fillText('一起看看，远方的风景。',48,550);ctx.font='20px system-ui';ctx.fillText('共享画面示意 · 不采集你的真实桌面',48,598);};draw();this.timer=setInterval(draw,100);this.stream=canvas.captureStream(10);}
+ publish(settings,source){this.room.paused=false;this.room.settings=settings;this.room.host_id='100';this.room.share_id='share';this.capture();this.role='publishing';this.emit();}
+ watch(){this.emit({busy:true});setTimeout(()=>{this.capture();this.role='viewing';this.emit();},650);}
+ stop(){this.dispose();this.stream=null;if(this.role==='publishing')this.room.share_id='';this.role='idle';this.emit();}
+ closeByModerator(){this.scenario('ended');}setSharedAudio(){}setPrivacyPaused(paused){this.room.paused=paused;this.emit({notice:paused?'隐私暂停中：画面与共享声音已隐藏，语音通话继续。':'已恢复共享。'});}friendPause(){if(this.role==='viewing'){this.room.paused=!this.room.paused;this.emit();}}
+}`;

@@ -1,0 +1,18 @@
+{
+  "product_version": "0.8.5",
+  "version": "0.8.1",
+  "downloads": {
+    "windows-x86_64": "https://edenvoice-1313309806.cos.ap-chengdu.myqcloud.com/releases/v0.8.1/windows/EdenVoice_0.8.1_x64-setup.exe",
+    "darwin-aarch64": "https://edenvoice-1313309806.cos.ap-chengdu.myqcloud.com/releases/v0.8.0/darwin-aarch64/EdenVoice_0.8.0_aarch64.dmg",
+    "linux-x86_64": "https://edenvoice-1313309806.cos.ap-chengdu.myqcloud.com/releases/v0.8.0/linux-x86_64/EdenVoice_0.8.0_amd64.AppImage",
+    "server-linux-amd64": "https://edenvoice-1313309806.cos.ap-chengdu.myqcloud.com/releases/v0.8.0/server-linux-amd64/EdenVoice-server-v0.8.0-linux-amd64.tar.gz",
+    "server-linux-arm64": "https://edenvoice-1313309806.cos.ap-chengdu.myqcloud.com/releases/v0.8.0/server-linux-arm64/EdenVoice-server-v0.8.0-linux-arm64.tar.gz"
+  },
+  "versions": {
+    "windows-x86_64": "0.8.1",
+    "darwin-aarch64": "0.8.0",
+    "linux-x86_64": "0.8.0",
+    "server-linux-amd64": "0.8.0",
+    "server-linux-arm64": "0.8.0"
+  }
+}

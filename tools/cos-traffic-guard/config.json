@@ -1,0 +1,6 @@
+{
+  "bucket": "your-bucket-1234567890",
+  "region": "ap-chengdu",
+  "limit_bytes": 500000000,
+  "probe_key": "releases/example-download.bin"
+}

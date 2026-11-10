@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>EdenVoice 需要访问麦克风以进行语音通话。</string>
+  <key>NSAudioCaptureUsageDescription</key>
+  <string>EdenVoice 在你开启共享声音时采集系统播放音频，并排除本客户端的语音输出。</string>
+</dict>
+</plist>

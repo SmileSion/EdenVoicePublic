@@ -1,0 +1,20 @@
+[env]
+# audiopus_sys vendors a libopus release whose CMake project declares a 3.1
+# policy baseline. CMake 4 removed that compatibility mode unless this minimum
+# is explicitly requested.
+CMAKE_POLICY_VERSION_MINIMUM = "3.5"
+# Enables Slint element metadata used by the headless UI interaction test.
+SLINT_EMIT_DEBUG_INFO = "1"
+
+[target.x86_64-pc-windows-gnu]
+linker = "x86_64-w64-mingw32-gcc"
+# The vendored Opus build enables stack-protector/FORTIFY symbols. Keep libssp
+# static and place its Windows runtime dependencies after it so release builds
+# do not require libssp-0.dll from a MinGW installation.
+rustflags = [
+    "-C", "link-arg=-Wl,-Bstatic",
+    "-C", "link-arg=-lssp",
+    "-C", "link-arg=-Wl,-Bdynamic",
+    "-C", "link-arg=-lmsvcrt",
+    "-C", "link-arg=-ladvapi32",
+]

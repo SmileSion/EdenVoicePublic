@@ -1,0 +1,19 @@
+[Unit]
+Description=EdenVoice COS 500 MB public download guard
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/edenvoice-cos-guard
+ExecStart=/opt/edenvoice-cos-guard/cos-traffic-guard --config /etc/edenvoice-cos-guard/config.json --credentials /etc/edenvoice-cos-guard/credentials.json --state-dir /var/lib/edenvoice-cos-guard --enforce --watch
+Restart=on-failure
+RestartSec=30
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

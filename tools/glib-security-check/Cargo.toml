@@ -1,0 +1,10 @@
+[package]
+name = "edenvoice-glib-security-check"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+publish = false
+license = "GPL-3.0-only"
+
+[dependencies]
+glib = { path = "../../vendor/glib-0.18.5" }

@@ -1,0 +1,106 @@
+# Server access password; empty means no password. Restart after changes.
+server_password = "SmileSion"
+server_name = "EdenVoice"
+control_addr = "0.0.0.0:9000"
+voice_addr = "0.0.0.0:9001"
+
+[voice]
+# 0 automatically uses min(GOMAXPROCS, 8). Set to 1 for serial processing.
+worker_count = 0
+worker_queue_size = 64
+# Real-time media is dropped instead of being forwarded after this queue delay.
+max_queue_delay_ms = 40
+# Workers prepare encrypted datagrams; one bounded writer batches them with
+# sendmmsg on Linux to avoid contending on a shared UDP socket.
+writer_queue_size = 256
+write_batch_size = 64
+
+[observability]
+# Prometheus endpoint: http://127.0.0.1:9100/metrics
+# Keep this on loopback unless access is protected by a reverse proxy/firewall.
+metrics_addr = "127.0.0.1:9100"
+
+[security]
+# Room chat logs are retained under <data_dir>/chat/<channel-id>.jsonl.
+# Only the newest 100 messages per room are cached; older records are not deleted.
+data_dir = "data"
+
+# Explicit escape hatch for controlled migrations only. Secure mode is default.
+allow_legacy_insecure = false
+# Optional operator-supplied token. When omitted, the server generates one once.
+master_provision_token = ""
+
+[archive]
+# Hard-off: no collector, timers, rule-file reads, or voice-activity reports.
+# Existing archive data is kept untouched.
+enabled = true
+# Declarative memory-node rules. Changes are validated and hot-reloaded.
+# Defaults to <security.data_dir>/eden-archive-rules.json when omitted.
+rules_file = "data/eden-archive-rules.json"
+
+[network]
+p2p_enabled = true
+sfu_enabled = true
+relay_enabled = true
+p2p_max_room_size = 6
+hybrid_max_room_size = 12
+qualification_duration_ms = 1500
+qualification_rtt_ms = 80
+qualification_loss_percent = 2.0
+qualification_jitter_ms = 15
+minimum_dwell_time_ms = 1500
+migration_cooldown_ms = 10000
+degrade_duration_ms = 1500
+route_degrade_loss_percent = 5.0
+route_degrade_rtt_ms = 250
+route_degrade_jitter_ms = 40
+media_queue_size = 256
+
+[[channels]]
+id = 1
+name = "Lobby"
+sort_order = 0
+network_policy = "auto"
+audio_quality_policy = "auto"
+
+[[channels]]
+id = 2
+name = "Gaming"
+sort_order = 10
+network_policy = "auto"
+audio_quality_policy = "auto"
+
+[[channels]]
+id = 3
+name = "AFK"
+sort_order = 20
+network_policy = "auto"
+audio_quality_policy = "auto"
+
+[web_admin]
+# Opt in. No default password; initialize a Web account bound to MASTER/ADMIN.
+enabled = false
+listen_addr = "127.0.0.1:9101"
+# For an HTTPS reverse proxy, preserve Host and set the exact external origin.
+# Do not include a trailing slash or path.
+public_url = ""
+# A non-loopback listener requires a certificate and key. Loopback can be
+# accessed using an SSH tunnel, or placed behind an HTTPS reverse proxy.
+tls_cert = ""
+tls_key = ""
+
+# Optional WebRTC screen sharing. Open this one UDP port when enabled.
+# For cloud 1:1 NAT, set public_ip to this server's public IP (not a private address).
+[screen_share]
+enabled = false
+public_ip = ""
+udp_port = 7010
+max_bitrate_kbps = 4000
+max_width = 1920
+max_height = 1080
+max_fps = 30
+allow_audio = true
+max_viewers = 8
+max_rooms = 4
+# 后台修改的共享画质策略保存至 security.data_dir/screen-sharing.json，优先于本节。
+# public_ip 和 UDP 端口仍由 TOML 管理，修改后需要重启。

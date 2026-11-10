@@ -1,0 +1,50 @@
+// Production React component/styles, with only native IPC and capture state stubbed.
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+import {readFile} from 'node:fs/promises';
+import {build} from 'esbuild';
+const require=createRequire(import.meta.url);
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const controllerPath=new URL('../src/screenShareController.ts',import.meta.url).pathname;
+const result=await build({stdin:{contents:`import React from 'react';import {createRoot} from 'react-dom/client';import {ScreenShare} from './src/ScreenShare';createRoot(document.getElementById('root')).render(<ScreenShare channelId="7" snapshot={{screenShareSupported:true,connection:'connected',serverAddress:'local',selfSessionId:'1',users:[{sessionId:'2',nickname:'测试成员'}],capabilities:['watch.manage']}}/>);`,resolveDir:process.cwd(),loader:'tsx'},bundle:true,write:false,format:'iife',jsx:'automatic',plugins:[{name:'native-stubs',setup(b){
+ b.onResolve({filter:/^\.\/screenShareController$/},()=>({path:'controller',namespace:'stub'}));
+ b.onResolve({filter:/^\.\/bridge$|^@tauri-apps\/api\/event$/},()=>({path:'native',namespace:'stub'}));
+ b.onLoad({filter:/.*/,namespace:'stub'},({path})=>({loader:'js',resolveDir:process.cwd(),contents:path==='native'?`export const dispatch=async()=>{};export const listen=async()=>()=>{};`:`export {defaultScreenSettings,fitScreenSettings} from ${JSON.stringify(controllerPath)};
+ const room={share_id:'',host_id:'2',viewers:1,ready:true,settings:{width:1280,height:720,fps:30,bitrate_kbps:2000,audio:true},policy:{enabled:true,max_width:1280,max_height:720,max_fps:20,max_bitrate_kbps:1800,allow_audio:true}};
+ export class ScreenShareController {onChange(cb){this.cb=cb;window.mockController=this;this.show('idle');}show(role,paused=false){this.role=role;this.cb({room:{...room,paused,share_id:role==='idle'?'':'share'},role,privacyPaused:paused,stream:null,busy:false,error:'',notice:''});}setPrivacyPaused(paused){this.show(this.role,paused);}refresh(){}receive(){}dispose(){}publish(settings,source){window.started={settings,source};this.show('publishing');}stop(){this.show('idle');}watch(){this.show('viewing');}closeByModerator(){window.shareClosed=true;this.show('idle');}setSharedAudio(enabled){window.audioEnabled=enabled;}}`}));
+}}]});
+const css=await readFile('src/styles.css','utf8');
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME_EXECUTABLE});
+try{
+ const page=await browser.newPage({viewport:{width:1000,height:700}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setContent('<div id="root"></div>');await page.evaluate(()=>Object.defineProperty(navigator,'platform',{value:'Win32',configurable:true}));await page.addStyleTag({content:css});await page.addScriptTag({content:result.outputFiles[0].text});
+ await page.getByRole('button',{name:'分享屏幕',exact:true}).click();
+ await page.getByRole('button',{name:'程序窗口',exact:true}).click();
+ assert.equal(await page.getByLabel('帧率',{exact:true}).inputValue(),'20');
+ assert.equal(await page.getByLabel('码率（kbps）').inputValue(),'1800');
+ await page.getByRole('checkbox').check();
+ await page.screenshot({path:'/tmp/eden-screen-client-settings.png'});
+ await page.setViewportSize({width:820,height:560});
+ await page.getByRole('button',{name:'选择画面并开始'}).click();
+ const started=await page.evaluate(()=>window.started);assert.equal(started.source,'window');assert.equal(started.settings.audio,true);assert.equal(started.settings.fps,20);
+ await page.getByRole('button',{name:'共享声音已开'}).click();assert.equal(await page.evaluate(()=>window.audioEnabled),false);
+ await page.getByRole('button',{name:'隐私暂停',exact:true}).click();await page.getByRole('heading',{name:'共享已暂停',exact:true}).waitFor();assert.equal(await page.locator('.screen-video video').evaluate(e=>getComputedStyle(e).visibility),'hidden');assert.equal(await page.getByRole('button',{name:'共享声音已暂停'}).isDisabled(),true);
+ await page.getByRole('button',{name:'恢复共享',exact:true}).click();assert.equal(await page.locator('.screen-privacy-placeholder').count(),0);
+ await page.getByRole('button',{name:'返回房间',exact:true}).click();await page.locator('.screen-viewer').waitFor({state:'hidden'});
+ await page.getByRole('button',{name:'查看画面',exact:true}).click();await page.locator('.screen-viewer').waitFor({state:'visible'});
+ await page.evaluate(()=>window.mockController.show('publishing',null));await page.getByRole('button',{name:'隐私暂停',exact:true}).waitFor({state:'hidden'});assert.equal(await page.getByRole('button',{name:'隐私暂停',exact:true}).count(),0);
+ await page.evaluate(()=>window.mockController.show('viewing',true));await page.getByText('分享者暂时离开，回来后会继续共享').waitFor();assert.equal(await page.getByRole('button',{name:'恢复共享',exact:true}).count(),0);
+ await page.getByRole('button',{name:'全屏',exact:true}).click();await page.waitForFunction(()=>document.fullscreenElement?.classList.contains('screen-video')===true);await page.evaluate(()=>document.exitFullscreen());
+ await page.getByRole('button',{name:'返回房间',exact:true}).click();
+ await page.getByRole('button',{name:'结束共享',exact:true}).click();assert.equal(await page.evaluate(()=>window.shareClosed),true);
+ const mac=await browser.newPage({viewport:{width:820,height:560}});mac.on('pageerror',e=>errors.push(e.message));
+ await mac.setContent('<div id="root"></div>');await mac.evaluate(()=>Object.defineProperty(navigator,'platform',{value:'MacIntel',configurable:true}));
+ await mac.addStyleTag({content:css});await mac.addScriptTag({content:result.outputFiles[0].text});
+ await mac.getByRole('button',{name:'分享屏幕',exact:true}).click();
+ assert.equal(await mac.getByRole('button',{name:'程序窗口',exact:true}).count(),0);
+ await mac.getByText(/共享桌面请选择右上角/).waitFor();
+ await mac.screenshot({path:'/tmp/eden-screen-client-mac-settings.png'});
+ await mac.getByRole('button',{name:'选择屏幕或窗口',exact:true}).click();
+ assert.equal(await mac.evaluate(()=>window.started.source),'system');
+ assert.deepEqual(errors,[]);console.log('PASS: production UI settings, source, audio, privacy pause/resume, viewer/fullscreen placeholder, collapse, moderator stop while viewing');
+}finally{await browser.close();}

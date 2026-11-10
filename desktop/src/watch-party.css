@@ -1,0 +1,10 @@
+/* Shared mpv settings in the main client settings page. */
+.player-settings { font-size:12px; }
+.watch-path { display:flex;gap:6px;margin-top:8px; }
+.watch-path input { min-width:0;flex:1;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px; }
+.player-settings .watch-actions { display:flex;justify-content:flex-start;flex-wrap:wrap;gap:8px;margin:12px 0 18px; }
+.player-settings button { padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--text);cursor:pointer; }
+.player-settings button:hover:not(:disabled) { background:var(--hover); }
+.player-settings button:disabled { opacity:.5;cursor:default; }
+.player-settings button:focus-visible,.player-settings input:focus-visible { outline:2px solid var(--accent-strong);outline-offset:2px; }
+.watch-error { color:var(--danger);user-select:text; }

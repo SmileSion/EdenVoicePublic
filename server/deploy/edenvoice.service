@@ -1,0 +1,22 @@
+[Unit]
+Description=EdenVoice voice server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=edenvoice
+Group=edenvoice
+WorkingDirectory=/var/lib/edenvoice
+ExecStart=/opt/edenvoice/voice-server --config /etc/edenvoice/config.toml
+Restart=on-failure
+RestartSec=2
+LimitNOFILE=65536
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+ReadWriteDirectories=/var/lib/edenvoice
+
+[Install]
+WantedBy=multi-user.target

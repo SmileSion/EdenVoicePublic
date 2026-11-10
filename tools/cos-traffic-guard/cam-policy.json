@@ -1,0 +1,15 @@
+{
+  "version": "2.0",
+  "statement": [
+    {
+      "effect": "allow",
+      "action": ["name/monitor:GetMonitorData"],
+      "resource": ["*"]
+    },
+    {
+      "effect": "allow",
+      "action": ["name/cos:GetBucketPolicy", "name/cos:PutBucketPolicy"],
+      "resource": ["qcs::cos:ap-chengdu:uid/1234567890:your-bucket-1234567890/*"]
+    }
+  ]
+}
